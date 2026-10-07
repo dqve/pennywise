@@ -2,6 +2,7 @@ import { mkdirSync } from 'node:fs';
 import { randomBytes } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
+import { inferCategory } from './domain.ts';
 import type { Plan, Transaction } from './domain.ts';
 
 export type User = { id:string; email:string; passwordHash:string; passwordSalt:string };
@@ -62,7 +63,7 @@ function randomId(){ return `${Date.now().toString(36)}-${randomBytes(8).toStrin
 
 export function listTransactions(userId:string): Transaction[] { return getDb().prepare('SELECT id,date,description,amount,category FROM transactions WHERE user_id=? ORDER BY date DESC, created_at DESC').all(userId) as unknown as Transaction[]; }
 export function replaceTransactions(userId:string, rows: Transaction[]) {
- const d=getDb(); d.exec('BEGIN'); try { d.prepare('DELETE FROM transactions WHERE user_id=?').run(userId); const s=d.prepare('INSERT INTO transactions(id,user_id,date,description,amount,category) VALUES(?,?,?,?,?,?)'); for(const t of rows)s.run(t.id,userId,t.date,t.description,t.amount,t.category); d.exec('COMMIT'); } catch(e){d.exec('ROLLBACK');throw e;} return listTransactions(userId);
+ const d=getDb(); d.exec('BEGIN'); try { d.prepare('DELETE FROM transactions WHERE user_id=?').run(userId); const s=d.prepare('INSERT INTO transactions(id,user_id,date,description,amount,category) VALUES(?,?,?,?,?,?)'); for(const t of rows)s.run(t.id,userId,t.date,t.description,t.amount,t.category ?? inferCategory(t.description,t.amount)); d.exec('COMMIT'); } catch(e){d.exec('ROLLBACK');throw e;} return listTransactions(userId);
 }
 export type Profile = {monthlyBudget:number;emergencyFundTarget:number;currentNetWorth:number;monthlyDebtPayment:number;dependents:number;incomeStability:'stable'|'variable'|'uncertain';primaryGoal:'emergency'|'debt'|'savings'|'investing'};
 export function getProfile(userId:string):Profile { const row=getDb().prepare('SELECT monthly_budget as monthlyBudget, emergency_fund_target as emergencyFundTarget, current_net_worth as currentNetWorth, monthly_debt_payment as monthlyDebtPayment, dependents, income_stability as incomeStability, primary_goal as primaryGoal FROM financial_profiles WHERE user_id=?').get(userId) as Profile|undefined; return row??{monthlyBudget:600000,emergencyFundTarget:1000000,currentNetWorth:0,monthlyDebtPayment:0,dependents:0,incomeStability:'stable',primaryGoal:'emergency'}; }
@@ -72,5 +73,5 @@ export type Goal = {id:string;name:string;target:number;current:number};
 export function listGoals(userId:string):Goal[] { return getDb().prepare('SELECT id,name,target,current FROM savings_goals WHERE user_id=? ORDER BY created_at DESC').all(userId) as unknown as Goal[]; }
 export function createGoal(userId:string,goal:Omit<Goal,'id'>) { const id = `goal-${Date.now()}-${randomBytes(6).toString('hex')}`; getDb().prepare('INSERT INTO savings_goals(id,user_id,name,target,current) VALUES(?,?,?,?,?)').run(id,userId,goal.name,goal.target,goal.current); return { ...goal, id }; }
 
-export function savePlan(userId:string,plan:Plan) { const id=`plan-${Date.now()}-${randomBytes(6).toString('hex')}`; getDb().prepare('UPDATE financial_plans SET status=\'archived\' WHERE user_id=? AND status=\'accepted\'').run(userId); getDb().prepare('INSERT INTO financial_plans(id,user_id,name,monthly_savings,discretionary_cut,projected_gain,status) VALUES(?,?,?,?,?,?,?)').run(id,userId,plan.name,plan.monthlySavings,plan.cut,plan.projectedGain,'accepted'); return {id,...plan,status:'accepted' as const}; }
+export function savePlan(userId:string,plan:Plan) { const id=`plan-${Date.now()}-${randomBytes(6).toString('hex')}`; getDb().prepare('UPDATE financial_plans SET status=\'archived\' WHERE user_id=? AND status=\'accepted\'').run(userId); getDb().prepare('INSERT INTO financial_plans(id,user_id,name,monthly_savings,discretionary_cut,projected_gain,status) VALUES(?,?,?,?,?,?,?)').run(id,userId,plan.name,plan.monthlySavings,plan.cut,plan.projectedGain,'accepted'); return {...plan,id,status:'accepted' as const}; }
 export function listPlans(userId:string) { return getDb().prepare('SELECT id,name,monthly_savings as monthlySavings,discretionary_cut as cut,projected_gain as projectedGain,status,created_at as createdAt FROM financial_plans WHERE user_id=? ORDER BY created_at DESC').all(userId); }
