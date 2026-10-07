@@ -1,0 +1,1 @@
+export default function Loading(){return <main><section className="auth-shell"><div className="auth-card"><span className="eyebrow">PENNYWISE</span><h1>Loading your financial space…</h1><p>Preparing your private financial dashboard.</p></div></section></main>}

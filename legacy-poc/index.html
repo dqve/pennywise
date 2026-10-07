@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Pennywise — Financial clarity, one day at a time</title>
+<style>
+:root{--bg:#f6f7f3;--card:#fff;--ink:#17211b;--muted:#6b756e;--line:#e2e7e1;--green:#0d7a50;--green2:#e8f5ef;--amber:#a96514;--amber2:#fff4df;--red:#a23b3b;--shadow:0 8px 30px rgba(21,37,28,.07)}*{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}button,input{font:inherit}.app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}.side{background:#10231b;color:#dcebe4;padding:26px 18px;position:sticky;top:0;height:100vh}.brand{font-weight:800;font-size:23px;letter-spacing:-.04em;padding:0 12px 28px}.brand span{color:#79d4ae}.nav{display:grid;gap:6px}.nav button{border:0;background:transparent;color:#b9c9c1;text-align:left;padding:11px 12px;border-radius:10px;cursor:pointer}.nav button.active,.nav button:hover{background:#1b392d;color:#fff}.side-note{position:absolute;bottom:22px;left:20px;right:20px;background:#18352a;padding:14px;border-radius:12px;font-size:12px;color:#a9c0b6;line-height:1.5}.main{padding:30px 36px;max-width:1450px;width:100%;margin:auto}.top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:26px}.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:11px;font-weight:800;color:var(--green)}h1{font-size:34px;letter-spacing:-.04em;margin:5px 0 7px}.sub{color:var(--muted);margin:0}.date{font-size:13px;color:var(--muted);padding-top:10px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}.metric{padding:20px}.metric .label{font-size:12px;color:var(--muted);margin-bottom:9px}.metric .value{font-size:27px;font-weight:800;letter-spacing:-.03em}.delta{font-size:12px;margin-top:8px;color:var(--green)}.layout{display:grid;grid-template-columns:1.35fr .9fr;gap:18px;margin-top:18px}.section{padding:22px}.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.section h2{font-size:17px;margin:0;letter-spacing:-.02em}.small{font-size:12px;color:var(--muted)}.score{display:flex;align-items:center;gap:24px}.ring{width:126px;height:126px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--green) 0 78%,#dfe9e3 78% 100%);position:relative}.ring:after{content:"";position:absolute;width:92px;height:92px;border-radius:50%;background:#fff}.ring strong{position:relative;z-index:1;font-size:31px}.score-copy{flex:1}.score-copy h3{margin:0 0 7px;font-size:18px}.score-copy p{margin:0;color:var(--muted);line-height:1.55;font-size:13px}.pill{display:inline-flex;padding:5px 8px;border-radius:999px;background:var(--green2);color:var(--green);font-weight:700;font-size:11px;margin-top:11px}.bar{height:8px;background:#edf0ed;border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:var(--green);border-radius:99px}.rows{display:grid;gap:13px}.row{display:flex;justify-content:space-between;gap:20px;font-size:13px}.row span:first-child{color:var(--muted)}.plan{padding:17px;border:1px solid var(--line);border-radius:13px;margin-bottom:11px}.plan.selected{border:2px solid var(--green);background:#fbfffd}.plan-top{display:flex;justify-content:space-between;gap:15px}.plan h3{margin:0 0 5px;font-size:15px}.plan p{font-size:12px;color:var(--muted);margin:0;line-height:1.45}.plan .amount{font-weight:800;color:var(--green);white-space:nowrap}.btn{border:0;background:var(--green);color:white;padding:10px 14px;border-radius:9px;font-weight:700;cursor:pointer}.btn.secondary{background:#edf4ef;color:var(--green)}.btn.ghost{background:transparent;color:var(--green);padding-left:0}.actions{display:flex;gap:8px;margin-top:14px}.tx{display:grid;gap:9px}.txrow{display:grid;grid-template-columns:1fr 110px 85px;align-items:center;padding:11px 0;border-bottom:1px solid #edf0ed;font-size:13px}.txrow:last-child{border-bottom:0}.merchant{font-weight:650}.category{font-size:11px;color:var(--muted);margin-top:2px}.money{text-align:right;font-weight:700}.negative{color:#27332c}.tag{font-size:10px;padding:4px 6px;border-radius:5px;background:#f1f3f1;color:#5f6862;justify-self:end}.insight{background:#10231b;color:white;border-radius:15px;padding:19px}.insight .eyebrow{color:#79d4ae}.insight p{line-height:1.55;font-size:13px;color:#c7d8d0}.upload{border:1.5px dashed #bdc9c1;padding:20px;border-radius:13px;text-align:center;background:#fbfcfb}.upload input{display:none}.upload label{cursor:pointer;display:inline-block}.hidden{display:none}.toast{position:fixed;right:22px;bottom:22px;background:#10231b;color:#fff;padding:13px 16px;border-radius:10px;box-shadow:var(--shadow);font-size:13px;opacity:0;transform:translateY(10px);transition:.2s}.toast.show{opacity:1;transform:none}.page{display:none}.page.active{display:block}.table-actions{display:flex;gap:8px;align-items:center}.select{border:1px solid var(--line);padding:8px;border-radius:8px;background:white;font-size:12px}@media(max-width:1000px){.app{grid-template-columns:1fr}.side{position:static;height:auto}.side-note{display:none}.nav{display:flex;overflow:auto}.main{padding:24px 18px}.grid{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}}@media(max-width:600px){.grid{grid-template-columns:1fr}.top{display:block}.date{padding-top:12px}.score{align-items:flex-start;flex-direction:column}.txrow{grid-template-columns:1fr 90px}.tag{display:none}}
+</style></head>
+<body>
+<div class="app">
+<aside class="side"><div class="brand">penny<span>wise</span></div><div class="nav">
+<button class="active" data-page="dashboard">Overview</button><button data-page="transactions">Transactions</button><button data-page="plans">Financial plans</button><button data-page="savings">Savings</button><button data-page="assessment">Assessment</button>
+</div><div class="side-note"><strong>POC mode</strong><br/>Using demo transaction data. Bank connections and persistent accounts are intentionally not enabled yet.</div></aside>
+<main class="main">
+<section id="dashboard" class="page active"><div class="top"><div><div class="eyebrow">Your financial picture</div><h1>Good morning, David.</h1><p class="sub">You’re building healthier money habits. Here’s where you stand.</p></div><div class="date">October 2026 · Demo profile</div></div>
+<div class="grid"><div class="card metric"><div class="label">Net worth</div><div class="value">₦4.82m</div><div class="delta">↑ 8.4% projected over 12 months</div></div><div class="card metric"><div class="label">Spending score</div><div class="value">78<span style="font-size:15px;color:#8a938e">/100</span></div><div class="delta">↑ 6 points this month</div></div><div class="card metric"><div class="label">Monthly income</div><div class="value">₦850k</div><div class="delta">₦510k spent · 60%</div></div><div class="card metric"><div class="label">Savings progress</div><div class="value">₦270k</div><div class="delta">₦30k to monthly target</div></div></div>
+<div class="layout"><div class="card section"><div class="section-head"><h2>Spending score</h2><span class="small">Last 30 days</span></div><div class="score"><div class="ring"><strong>78</strong></div><div class="score-copy"><h3>You're doing well</h3><p>Your spending is below your recent average and your savings rate is moving in the right direction. Transport is the category with the most room for improvement.</p><span class="pill">+6 vs last month</span></div></div><div style="margin-top:23px"><div class="row"><span>Needs</span><strong>84</strong></div><div class="bar" style="margin:6px 0 12px"><i style="width:84%"></i></div><div class="row"><span>Wants</span><strong>67</strong></div><div class="bar" style="margin:6px 0 12px"><i style="width:67%"></i></div><div class="row"><span>Savings</span><strong>88</strong></div><div class="bar" style="margin:6px 0 12px"><i style="width:88%"></i></div></div></div>
+<div class="card section"><div class="section-head"><h2>Today's budget</h2><span class="small">Oct 5</span></div><div style="font-size:34px;font-weight:800;letter-spacing:-.04em">₦18,500</div><p class="small" style="margin:6px 0 18px">Recommended daily spend</p><div class="row"><span>Spent today</span><strong>₦7,200</strong></div><div class="bar" style="margin:8px 0 16px"><i style="width:39%"></i></div><div class="rows"><div class="row"><span>Remaining</span><strong style="color:var(--green)">₦11,300</strong></div><div class="row"><span>Monthly budget</span><strong>₦600k</strong></div></div><div class="actions"><button class="btn" onclick="showToast('Budget updated')">Adjust budget</button><button class="btn secondary" onclick="go('transactions')">Review spending</button></div></div></div>
+<div class="layout"><div class="card section"><div class="section-head"><h2>Your financial plans</h2><button class="btn ghost" onclick="go('plans')">View all →</button></div><div class="plan selected"><div class="plan-top"><div><h3>Balanced Builder</h3><p>Increase savings without making your monthly lifestyle too restrictive.</p></div><div class="amount">+₦1.02m</div></div><div class="small" style="margin-top:12px">Projected net-worth improvement · 12 months</div></div><div class="plan"><div class="plan-top"><div><h3>Fast Track</h3><p>Prioritise savings aggressively and cut discretionary spend.</p></div><div class="amount">+₦1.34m</div></div></div></div>
+<div class="insight"><div class="eyebrow">Pennywise insight</div><h2 style="margin:6px 0 0;font-size:20px">Your transport spend is 24% above your target.</h2><p>Reducing it by about ₦18,000 this month would keep your Balanced Builder plan on track without touching your savings target.</p><button class="btn secondary" onclick="showToast('Recommendation saved to plan')">Apply to plan</button></div></div>
+</section>
+<section id="transactions" class="page"><div class="top"><div><div class="eyebrow">Money in motion</div><h1>Transactions</h1><p class="sub">Review the activity Pennywise is using to understand your behaviour.</p></div></div><div class="card section"><div class="table-actions" style="justify-content:space-between;margin-bottom:10px"><div><button class="btn" onclick="document.getElementById('file').click()">Upload statement</button><input id="file" type="file" accept=".csv,.txt,.pdf" style="display:none" onchange="handleFile(this)"></div><select class="select"><option>All categories</option><option>Food</option><option>Transport</option><option>Housing</option><option>Shopping</option></select></div><div class="upload" id="uploadStatus"><strong>POC statement ingestion</strong><div class="small" style="margin:6px 0 12px">Upload a CSV/TXT statement to replace the demo transactions. PDF upload is accepted as a future-parser placeholder.</div><label class="btn secondary" for="file">Choose file</label></div><div class="small" id="ingestionSummary" style="margin:14px 0 0">5 demo transactions · 1 income source · 4 expenses</div><div class="tx" id="transactionList" style="margin-top:10px"></div></div></section>
+<section id="plans" class="page"><div class="top"><div><div class="eyebrow">Choose your direction</div><h1>Financial plans</h1><p class="sub">Three realistic paths based on the current demo financial picture.</p></div></div><div class="layout"><div class="card section"><div class="plan selected"><div class="plan-top"><div><h3>Balanced Builder</h3><p>Keep your lifestyle stable while increasing savings and reducing avoidable spend.</p></div><div class="amount">+₦1.02m</div></div><div class="rows" style="margin-top:16px"><div class="row"><span>Monthly savings</span><strong>₦300k</strong></div><div class="row"><span>Target discretionary cut</span><strong>₦45k</strong></div><div class="row"><span>Projected net worth</span><strong>₦5.84m</strong></div></div><div class="actions"><button class="btn" onclick="showToast('Balanced Builder enrolled')">Enrol in plan</button><button class="btn secondary" onclick="showToast('Plan saved')">Save</button></div></div><div class="plan"><div class="plan-top"><div><h3>Fast Track</h3><p>More aggressive savings for users who want the strongest projected result.</p></div><div class="amount">+₦1.34m</div></div><div class="rows" style="margin-top:16px"><div class="row"><span>Monthly savings</span><strong>₦390k</strong></div><div class="row"><span>Target discretionary cut</span><strong>₦90k</strong></div><div class="row"><span>Projected net worth</span><strong>₦6.16m</strong></div></div></div><div class="plan"><div class="plan-top"><div><h3>Comfort First</h3><p>Prioritise flexibility and keep more room for discretionary spending.</p></div><div class="amount">+₦720k</div></div><div class="rows" style="margin-top:16px"><div class="row"><span>Monthly savings</span><strong>₦240k</strong></div><div class="row"><span>Target discretionary cut</span><strong>₦15k</strong></div><div class="row"><span>Projected net worth</span><strong>₦5.54m</strong></div></div></div></div><div class="card section"><h2>How Pennywise chose these</h2><p class="small" style="line-height:1.7">The demo engine weighs income stability, recurring commitments, spending mix, current savings behaviour and the user's target. In production, this becomes a versioned financial-planning service with explainable rules plus the AI recommendation layer.</p><div class="rows" style="margin-top:20px"><div class="row"><span>Income stability</span><strong>High</strong></div><div class="row"><span>Savings rate</span><strong>32%</strong></div><div class="row"><span>Needs / income</span><strong>44%</strong></div><div class="row"><span>Wants / income</span><strong>16%</strong></div></div></div></div></section>
+<section id="savings" class="page"><div class="top"><div><div class="eyebrow">Build your buffer</div><h1>Savings</h1><p class="sub">Track the goals that matter and keep them connected to your financial plan.</p></div></div><div class="grid"><div class="card metric"><div class="label">Emergency fund</div><div class="value">₦270k</div><div class="delta">27% of ₦1m target</div></div><div class="card metric"><div class="label">Monthly target</div><div class="value">₦300k</div><div class="delta">₦30k remaining this month</div></div><div class="card metric"><div class="label">12-month goal</div><div class="value">₦3.6m</div><div class="delta">On track with current plan</div></div><div class="card metric"><div class="label">Savings streak</div><div class="value">14 days</div><div class="delta">Best: 21 days</div></div></div><div class="card section" style="margin-top:18px"><div class="section-head"><h2>Emergency fund</h2><span class="pill">27% complete</span></div><div class="bar" style="height:12px"><i style="width:27%"></i></div><div class="row" style="margin-top:14px"><span>₦270,000 saved</span><strong>₦1,000,000 target</strong></div><div class="actions"><button class="btn" onclick="showToast('Savings contribution scheduled')">Add contribution</button><button class="btn secondary" onclick="showToast('Goal settings opened')">Edit goal</button></div></div></section>
+<section id="assessment" class="page"><div class="top"><div><div class="eyebrow">Start with context</div><h1>Financial assessment</h1><p class="sub">These inputs help Pennywise make the first recommendations relevant.</p></div></div><div class="card section" style="max-width:760px"><div class="rows"><label>Monthly take-home income<input class="select" style="width:100%;margin-top:6px" value="850000"></label><label>Typical monthly essential spend<input class="select" style="width:100%;margin-top:6px" value="375000"></label><label>Current savings<input class="select" style="width:100%;margin-top:6px" value="270000"></label><label>Primary goal<select class="select" style="width:100%;margin-top:6px"><option>Build emergency fund</option><option>Save for a major purchase</option><option>Grow investments</option><option>Reduce debt</option></select></label></div><div class="actions"><button class="btn" onclick="showToast('Assessment saved — plans recalculated')">Save assessment</button></div></div></section>
+</main></div><div id="toast" class="toast"></div>
+<script>
+const currency = new Intl.NumberFormat('en-NG',{style:'currency',currency:'NGN',maximumFractionDigits:0});
+const DEMO = [
+  {date:'2026-10-04',description:'Shoprite Ikeja',amount:-24600,category:'Food'},
+  {date:'2026-10-04',description:'Bolt',amount:-8400,category:'Transport'},
+  {date:'2026-10-01',description:'Salary - 3Line',amount:850000,category:'Income'},
+  {date:'2026-09-29',description:'Netflix',amount:-7000,category:'Entertainment'},
+  {date:'2026-09-27',description:'Rent transfer',amount:-180000,category:'Housing'}
+];
+let transactions=[...DEMO];
+const categoryRules=[
+  ['salary','Income'],['payroll','Income'],['wage','Income'],['rent','Housing'],['landlord','Housing'],
+  ['shoprite','Food'],['restaurant','Food'],['food','Food'],['bolt','Transport'],['uber','Transport'],['fuel','Transport'],
+  ['netflix','Entertainment'],['spotify','Entertainment'],['cinema','Entertainment'],['airtime','Utilities'],['electric','Utilities'],
+  ['internet','Utilities'],['pharmacy','Health'],['hospital','Health'],['school','Education'],['tuition','Education'],
+  ['amazon','Shopping'],['jumia','Shopping']
+];
+function go(page){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(page).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===page));window.scrollTo({top:0,behavior:'smooth'})}
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>go(b.dataset.page)));
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+function fmt(n){return currency.format(Math.round(n)).replace('NGN','₦').trim()}
+function classify(description){const d=description.toLowerCase();const hit=categoryRules.find(([k])=>d.includes(k));return hit?hit[1]:'Other'}
+function normalizeRow(row){
+  const cells=row.split(',').map(x=>x.trim().replace(/^['"]|['"]$/g,''));
+  if(cells.length<3)return null;
+  const [date,description,amountRaw,categoryRaw]=cells;
+  const amount=Number(String(amountRaw).replace(/[₦,\s]/g,''));
+  if(!date || !description || !Number.isFinite(amount))return null;
+  return {date,description,amount,category:categoryRaw||classify(description)};
+}
+function parseCSV(text){
+  const lines=text.replace(/\r/g,'').split('\n').map(x=>x.trim()).filter(Boolean);
+  if(!lines.length)return [];
+  const first=lines[0].toLowerCase();
+  const hasHeader=/date/.test(first)&&/(description|merchant|narration)/.test(first);
+  const body=hasHeader?lines.slice(1):lines;
+  return body.map(normalizeRow).filter(Boolean);
+}
+function renderTransactions(){
+  const list=document.getElementById('transactionList');
+  if(!list)return;
+  if(!transactions.length){list.innerHTML='<div class="small" style="padding:18px 0">No transactions found. Upload a CSV statement to continue.</div>';return;}
+  list.innerHTML=transactions.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).map(t=>{
+    const credit=t.amount>=0;
+    return `<div class="txrow"><div><div class="merchant">${escapeHtml(t.description)}</div><div class="category">${escapeHtml(t.category)} · ${escapeHtml(t.date)}</div></div><span class="tag">${credit?'CREDIT':'DEBIT'}</span><div class="money" style="color:${credit?'var(--green)':'inherit'}">${credit?'+':'−'}${fmt(Math.abs(t.amount))}</div></div>`;
+  }).join('');
+  const income=transactions.filter(t=>t.amount>0).reduce((a,t)=>a+t.amount,0);
+  const expenses=-transactions.filter(t=>t.amount<0).reduce((a,t)=>a+t.amount,0);
+  document.getElementById('ingestionSummary').textContent=`${transactions.length} transactions · ${fmt(income)} income · ${fmt(expenses)} expenses · ${income?Math.round((income-expenses)/income*100):0}% retained`;
+}
+function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+function recalculate(){
+  const income=transactions.filter(t=>t.amount>0).reduce((a,t)=>a+t.amount,0);
+  const expenses=-transactions.filter(t=>t.amount<0).reduce((a,t)=>a+t.amount,0);
+  const savings=Math.max(0,income-expenses);
+  const savingsRate=income?Math.round(savings/income*100):0;
+  const score=Math.max(0,Math.min(100,55+Math.min(25,savingsRate)+Math.max(0,20-Math.round(expenses/Math.max(income,1)*20))));
+  return {income,expenses,savings,savingsRate,score};
+}
+function applyAnalytics(){
+  const a=recalculate();
+  const incomeEl=document.querySelector('#dashboard .grid .metric:nth-child(3) .value');
+  const savingsEl=document.querySelector('#dashboard .grid .metric:nth-child(4) .value');
+  if(incomeEl)incomeEl.innerHTML=fmt(a.income);
+  if(savingsEl)savingsEl.innerHTML=fmt(a.savings);
+  const scoreEls=document.querySelectorAll('.ring strong,.score-copy .pill');
+  if(scoreEls[0])scoreEls[0].textContent=a.score;
+  if(scoreEls[1])scoreEls[1].textContent=`${a.savingsRate}% retained`;
+  document.querySelectorAll('#plans .row').forEach(()=>{});
+}
+function handleFile(input){
+  const f=input.files[0]; if(!f)return;
+  const status=document.getElementById('uploadStatus');
+  if(/\.pdf$/i.test(f.name)){
+    status.innerHTML='<strong>PDF received</strong><div class="small" style="margin-top:6px">The file boundary is working, but production PDF table extraction is intentionally not enabled in this slice. Use CSV for live parsing.</div>';
+    showToast('PDF received — parser is next'); return;
+  }
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const parsed=parseCSV(reader.result);
+    if(!parsed.length){status.innerHTML='<strong>Could not read transactions</strong><div class="small" style="margin-top:6px">Expected CSV columns: date, description, amount, category (category is optional).</div>';showToast('No valid transactions found');return;}
+    transactions=parsed; renderTransactions(); applyAnalytics();
+    status.innerHTML=`<strong>${escapeHtml(f.name)} imported</strong><div class="small" style="margin-top:6px">${parsed.length} transactions normalized and analysed locally. Categories were inferred where missing.</div>`;
+    showToast(`${parsed.length} transactions imported`);
+  };
+  reader.readAsText(f);
+}
+renderTransactions();applyAnalytics();
+</script></body></html>
