@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto';
+import postgres, { type Sql, type TransactionSql } from 'postgres';
 import type { Plan, Transaction } from './domain.ts';
 import * as local from './db.ts';
 import type { Goal, Profile, SessionUser, User } from './db.ts';
@@ -7,16 +8,16 @@ const isHosted = Boolean(process.env.VERCEL);
 const databaseUrl = process.env.DATABASE_URL;
 if (isHosted && !databaseUrl) console.error('Pennywise: DATABASE_URL is required on Vercel');
 function hasPostgres() { if (isHosted && !databaseUrl) throw new Error('DATABASE_NOT_CONFIGURED'); return Boolean(databaseUrl); }
-let client: ReturnType<typeof import('postgres').default> | undefined;
-async function sql() {
+let client: Sql | undefined;
+async function sql(): Promise<Sql> {
   if (!databaseUrl) throw new Error('DATABASE_NOT_CONFIGURED');
-  if (!client) { const {default: postgres} = await import('postgres'); client = postgres(databaseUrl, {max: 5, idle_timeout: 20, connect_timeout: 10, prepare: false}); }
+  if (!client) client = postgres(databaseUrl, {max: 5, idle_timeout: 20, connect_timeout: 10, prepare: false});
   return client;
 }
 const makeId=(prefix:string)=>`${prefix}-${Date.now().toString(36)}-${randomBytes(8).toString('hex')}`;
 const asNum=(value:unknown)=>Number(value);
 const asProfile=(r:Record<string,unknown>):Profile=>({monthlyBudget:asNum(r.monthlyBudget),emergencyFundTarget:asNum(r.emergencyFundTarget),currentNetWorth:asNum(r.currentNetWorth),monthlyDebtPayment:asNum(r.monthlyDebtPayment),dependents:asNum(r.dependents),incomeStability:r.incomeStability as Profile['incomeStability'],primaryGoal:r.primaryGoal as Profile['primaryGoal']});
-async function withUser<T>(userId:string, task:(tx:any)=>Promise<T>):Promise<T>{
+async function withUser<T>(userId:string, task:(tx:TransactionSql)=>Promise<T>):Promise<T>{
   const db=await sql();
   return await db.begin(async tx=>{
     await tx`SELECT set_config('app.user_id', ${userId}, true)`;
