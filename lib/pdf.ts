@@ -28,6 +28,12 @@ function amountFromText(raw: string) {
   return negative ? -Math.abs(numeric) : Math.abs(numeric);
 }
 
+function isCalendarDate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
 export async function extractPdfTransactions(input: Buffer): Promise<Transaction[]> {
   const text = await extractText(input);
   const rows: Transaction[] = [];
@@ -37,9 +43,9 @@ export async function extractPdfTransactions(input: Buffer): Promise<Transaction
   for (const [index, line] of text.split(/\r?\n/).entries()) {
     const match = line.match(re); if (!match) continue;
     const [, rawDate, description, rawAmount] = match;
-    const isoDate = /^\\d{4}-/.test(rawDate) ? rawDate : rawDate.replace(/-/g, '/').split('/').reverse().join('-');
-    const parsedDate = isoDate.replace(/\\//g, '-');
-    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(parsedDate)) continue;
+    const isoDate = /^\d{4}-/.test(rawDate) ? rawDate : rawDate.replace(/-/g, '/').split('/').reverse().join('-');
+    const parsedDate = isoDate.replace(/\//g, '-');
+    if (!isCalendarDate(parsedDate)) continue;
     rows.push({ id: `pdf-${index + 1}`, date: parsedDate, description: description.trim(), amount: amountFromText(rawAmount) });
   }
   if (!rows.length) throw new Error('No transaction rows could be extracted from this PDF. Use a text-based statement with date, description and amount columns.');
