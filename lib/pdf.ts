@@ -1,17 +1,23 @@
 import { spawn } from 'node:child_process';
 import { normalizeTransactions, type Transaction } from './domain.ts';
 
-function runPdftotext(input: Buffer): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const child = spawn('pdftotext', ['-layout', '-', '-']);
-    let stdout = ''; let stderr = '';
-    child.stdout.setEncoding('utf8'); child.stderr.setEncoding('utf8');
-    child.stdout.on('data', chunk => { stdout += chunk; });
-    child.stderr.on('data', chunk => { stderr += chunk; });
-    child.on('error', reject);
-    child.on('close', code => code === 0 ? resolve(stdout) : reject(new Error(stderr.trim() || `pdftotext exited with ${code}`)));
-    child.stdin.end(input);
-  });
+async function extractText(input: Buffer): Promise<string> {
+  if (input.length > 10 * 1024 * 1024) throw new Error('PDF is too large');
+  if (input.subarray(0, 5).toString() !== '%PDF-') throw new Error('Invalid PDF document');
+  if (!process.env.VERCEL && !process.env.DATABASE_URL) {
+    // Development fallback only; hosted extraction must use portable JS.
+    return new Promise((resolve,reject)=>{
+      const child=spawn('pdftotext',['-layout','-','-']);let stdout='';let stderr='';
+      child.stdout.setEncoding('utf8');child.stderr.setEncoding('utf8');
+      child.stdout.on('data',chunk=>{stdout+=chunk});child.stderr.on('data',chunk=>{stderr+=chunk});
+      child.on('error',reject);child.on('close',code=>code===0?resolve(stdout):reject(new Error(stderr||'PDF extraction failed')));
+      child.stdin.end(input);
+    });
+  }
+  const { PDFParse } = await import('pdf-parse');
+  const parser = new PDFParse({ data: new Uint8Array(input) });
+  try { const result = await parser.getText(); return result.text; }
+  finally { await parser.destroy(); }
 }
 
 function amountFromText(raw: string) {
@@ -23,7 +29,7 @@ function amountFromText(raw: string) {
 }
 
 export async function extractPdfTransactions(input: Buffer): Promise<Transaction[]> {
-  const text = await runPdftotext(input);
+  const text = await extractText(input);
   const rows: Transaction[] = [];
   const date = '(?:\\d{4}-\\d{2}-\\d{2}|\\d{2}[/-]\\d{2}[/-]\\d{4})';
   const amount = '(?:₦|NGN)?\\(?-?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\)?(?:\\s+(?:CR|DR))?';
@@ -31,9 +37,9 @@ export async function extractPdfTransactions(input: Buffer): Promise<Transaction
   for (const [index, line] of text.split(/\r?\n/).entries()) {
     const match = line.match(re); if (!match) continue;
     const [, rawDate, description, rawAmount] = match;
-    const isoDate = /^\d{4}-/.test(rawDate) ? rawDate : rawDate.replace(/-/g, '/').split('/').reverse().join('-');
-    const parsedDate = isoDate.replace(/\//g, '-');
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(parsedDate)) continue;
+    const isoDate = /^\\d{4}-/.test(rawDate) ? rawDate : rawDate.replace(/-/g, '/').split('/').reverse().join('-');
+    const parsedDate = isoDate.replace(/\\//g, '-');
+    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(parsedDate)) continue;
     rows.push({ id: `pdf-${index + 1}`, date: parsedDate, description: description.trim(), amount: amountFromText(rawAmount) });
   }
   if (!rows.length) throw new Error('No transaction rows could be extracted from this PDF. Use a text-based statement with date, description and amount columns.');

@@ -1,39 +1,42 @@
 # Pennywise MVP implementation status
 
-## Implemented and verified
-- Responsive consumer financial-health dashboard.
-- Email/password authentication with salted scrypt password hashes.
-- HttpOnly opaque session cookie with server-side hashed session token.
-- Authenticated API boundary for all customer financial data.
-- Per-user ownership on transactions, profiles, goals and plans.
-- CSV/TXT transaction ingestion with deterministic categorisation.
-- Transaction validation and user-scoped duplicate-ID protection.
-- Deterministic income, expense, savings, savings-rate, spending-score and daily-budget calculations.
-- Three generated financial-plan options.
-- Persistent plan acceptance with one active plan per user.
-- Persistent financial assessment/profile including net worth, debt payment, dependents, income stability and primary goal.
-- Deterministic 12-month cash/net-worth projection from the selected plan.
-- Persistent savings goals.
+## Implemented in source
+- Responsive violet app shell for Overview, Transactions, Plans, Savings Goals and Financial Profile.
+- Email/password auth using salted scrypt hashes.
+- Opaque random session tokens; only SHA-256 hashes stored server-side; HttpOnly cookies.
+- Authenticated customer API boundary.
+- User-scoped transaction/profile/goal/plan access.
+- CSV/TXT transaction import, deterministic categorisation and validation.
+- Transaction ownership and duplicate-ID validation.
+- Deterministic income, expense, estimated savings, savings-rate, spending-score and daily-budget calculations.
+- Three generated financial plan options; server recomputes accepted plan values.
+- Persistent financial profile and savings goals.
+- Goal progress owner-scoped mutations.
 - Atomic statement replacement.
-- Local Node 22 SQLite persistence for executable development.
-- Production Postgres/Supabase schema with ownership and RLS policies.
-- Formal requirement/acceptance matrix and QA cases.
-- Domain, validation, credentials, persistence and cross-user isolation verification.
-- First-run state no longer seeds demo financial data.
+- Local SQLite persistence for Node 22 development and tests.
+- Async PostgreSQL persistence adapter with transaction-local app.user_id.
+- PostgreSQL ENABLE + FORCE RLS policies for transactions, financial_profiles, savings_goals and financial_plans.
+- Partial unique index for one accepted plan per user.
+- Deployment, architecture, security and traceability documentation.
+- Domain and local SQLite persistence/user-isolation checks.
 
 ## Not yet release-complete
-- Text-based PDF statement extraction using a Node PDF-to-text adapter; OCR and bank-specific statement adapters remain outstanding.
-- Bank/open-banking integrations.
-- LLaMA/RAG recommendation service.
-- Notifications, recurring savings execution and progress automation.
-- Production rate limiting, abuse controls, audit logging, key-management policy and deployment secrets.
-- Full browser E2E/accessibility/recovery testing.
-- Full Next.js typecheck/build in this environment because npm dependency installation timed out.
-- Production Postgres/Supabase integration and live RLS verification.
+- Hosted PostgreSQL schema and role setup; connection to the already-provisioned Neon project is not yet verified.
+- RLS runtime test under the exact dedicated non-owner/no-BYPASSRLS role.
+- Full dependency installation, typecheck, Next.js build and dependency scan.
+- Browser E2E, accessibility and real-device responsive review.
+- Login/signup rate limiting and CSRF adversarial review.
+- Audit logging, alerting, session cleanup and recovery flows.
+- PDF extraction fixture in hosted runtime; OCR and bank-specific parsers.
+- Backup/restore and failure-recovery drill.
+- Vercel Preview and production deployment.
+
+## Verification record
+- Node.js 22.16.0 local environment.
+- Domain tests: 3/3 passed.
+- scripts/verify.ts: passed for domain, local SQLite persistence, duplicate/atomic replacement and user isolation.
+- Full typecheck/build: blocked locally because dependencies are unavailable in this environment.
+- Production Postgres and Vercel runtime: not verified.
 
 ## Release decision
-The application is a stronger authenticated MVP engineering slice, but it is **not declared production-ready** until the blocked release gates in `docs/REQUIREMENTS.md` are executed successfully.
-
-## Toolchain
-
-The MVP pins Next.js 16.3.8, React 19.3.0, Zod 4.6.5 and TypeScript 5.9.3 rather than floating on `latest`.
+NOT PRODUCTION READY. Do not process real customer financial data until all release gates are completed and evidence is retained.

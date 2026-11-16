@@ -1,31 +1,45 @@
 # Pennywise implementation review — 2026-11-16
 
-## Scope and baseline
-- Repository: `dqve/pennywise`
-- Base: `main` at `95142f583c9bab59771b4a10735bc628eee9ec09`
-- Review branch: `feat/violet-postgres-auth-hardening`
-- Candidate implementation inspected from the locally prepared violet/Postgres upgrade archive.
+## Scope and branch
+- Repository: dqve/pennywise
+- Base: main at 95142f583c9bab59771b4a10735bc628eee9ec09
+- Feature branch: feat/violet-postgres-auth-hardening
+- Changes are isolated from main.
 
-## Verified checks
-- Domain unit tests: 3/3 passed.
-- Local persistence and cross-user isolation verification: passed.
-- Node runtime used for these checks: 22.16.0.
+## Implemented on this branch
+- Violet responsive app shell, Overview, Transactions, Plans, Savings Goals and Financial Profile.
+- Restored the one-year projection view using the current net worth plus the selected plan's monthly savings target × 12. It is clearly labelled illustrative and excludes returns, inflation, debt changes and unimported activity.
+- Async Postgres adapter for hosted runtime; local SQLite remains for development and deterministic tests.
+- Fail-closed hosted behavior when DATABASE_URL is missing.
+- PostgreSQL ENABLE + FORCE RLS policies on transactions, financial_profiles, savings_goals and financial_plans using transaction-local app.user_id derived from the verified server session.
+- One accepted financial plan per user enforced by a partial unique index.
+- Salted scrypt password hashes, hashed opaque session tokens and HttpOnly cookies.
+- Signup/login response handling distinguishes validation, duplicate credentials and service failure.
+- Documentation, traceability, QA cases and GitHub Actions quality checks.
 
-## Defects / release gates found during review
-1. Candidate `lib/credentials.ts` declared two `async` functions with synchronous `User` return annotations. They must return `Promise<User>`. This was corrected in the local review copy; it has not yet been published.
-2. Dependency installation timed out in this environment. Typecheck and production build therefore remain unverified.
-3. The Postgres schema uses application-enforced user scoping, not Postgres RLS. The database role must be private and least-privileged; do not describe this schema as RLS-protected.
-4. Production database connectivity, schema migration, backup/restore, concurrent-session behavior and cross-account isolation against the hosted database remain unverified.
-5. Login/signup abuse controls, rate limiting, CSRF review, audit logging and alerting remain release gates.
-6. PDF extraction supports text-based statements only; OCR and bank-specific parsing are not implemented. Hosted parser compatibility and upload resource limits require validation.
-7. A successful Vercel build/deployment is not yet available as a verification signal because the connected Vercel integration cannot discover the Pennywise project.
+## Locally verified
+- Node.js 22.16.0.
+- Domain tests: 3/3 passed.
+- scripts/verify.ts: domain, local SQLite persistence, atomic replacement, credential validation and user-isolation verification passed.
+
+## Neon migration validation
+A schema migration was prepared on disposable Neon branch br-long-heart-zaqka3zz. Under a dedicated read/write application role:
+- app role flags: rolsuper=false, rolbypassrls=false, rolcreaterole=false, rolcreatedb=false.
+- With no app.user_id context, SELECT on transactions returned zero rows.
+- With rls-test-a context, only rls-test-a rows were visible in transactions, financial_profiles, savings_goals and financial_plans.
+- A cross-user UPDATE returned no rows.
+- A cross-user INSERT was rejected by the transactions RLS policy (SQLSTATE 42501).
+- Migration branch contains only synthetic test records; the production/default Neon branch was not changed.
+- Permanent migration and runtime role provisioning are awaiting explicit approval.
+
+## Open release gates
+1. Install dependencies in CI, generate/commit a lockfile and pass typecheck/build.
+2. Run the Postgres integration suite on the permanent branch with its dedicated runtime role.
+3. Configure server-only DATABASE_URL in Vercel Preview and Production and deploy a Preview.
+4. Run full browser E2E across two accounts, including login, logout, import, profile, plans, goals, projection and unauthorized/forbidden states.
+5. Complete login/signup rate limiting, CSRF, upload-abuse and dependency security review.
+6. Implement audit logging, alerting, session cleanup, backup/restore and incident runbook.
+7. Validate real-device responsive behavior, accessibility and representative PDF formats.
 
 ## Release decision
-Not production-ready. Do not use real customer financial data until the outstanding security, database, deployment and end-to-end gates have passed.
-
-## Next implementation sequence
-1. Apply the candidate source changes to this branch and resolve type/build failures.
-2. Add Postgres integration tests for auth, persistence, transaction replacement and tenant isolation.
-3. Complete security controls and failure-state handling.
-4. Run browser E2E and real-device responsive/accessibility review.
-5. Deploy to Preview, validate the complete journey, then request explicit production release approval.
+NOT PRODUCTION READY. Do not process real customer financial data until the open gates are closed and evidence is retained.

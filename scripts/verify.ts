@@ -6,7 +6,10 @@ import { validateGoal, validateProfile, validateTransactions } from '../lib/vali
 import { extractPdfTransactions } from '../lib/pdf.ts';
 import { registerUser, verifyUser } from '../lib/credentials.ts';
 
-const csv=`date,description,amount,category\n2026-10-01,Salary - Acme,850000,Income\n2026-10-02,Shoprite Ikeja,-24600,Food\n2026-10-03,Bolt,-8400,Transport`;
+const csv=`date,description,amount,category
+2026-10-01,Salary - Acme,850000,Income
+2026-10-02,Shoprite Ikeja,-24600,Food
+2026-10-03,Bolt,-8400,Transport`;
 const rows=parseCSV(csv);
 assert.equal(parseCSV('date,description,amount\n2026-10-04,"Shoprite, Ikeja",-24600').length,1);
 assert.equal(rows.length,3);
@@ -20,15 +23,15 @@ assert.equal(validateProfile({monthlyBudget:500000,emergencyFundTarget:1000000,c
 const pdfRows=await extractPdfTransactions(readFileSync(new URL('../fixtures/statement.pdf', import.meta.url))); assert.equal(pdfRows.length,3); assert.equal(pdfRows[1].amount,-24600); assert.equal(pdfRows[1].category,'Food');
 
 const dbPath=process.env.PENNYWISE_DB_PATH ?? '/tmp/pennywise-verification.sqlite'; rmSync(dbPath,{force:true});
-const {createUser,replaceTransactions,listTransactions,saveProfile,getProfile,createGoal,listGoals,savePlan,listPlans}=await import('../lib/db.ts');
+const {createUser,replaceTransactions,listTransactions,saveProfile,getProfile,createGoal,listGoals,updateGoal,savePlan,listPlans}=await import('../lib/db.ts');
 const a=createUser({email:'a@example.com',passwordHash:'hash-a',passwordSalt:'salt-a'});
 const b=createUser({email:'b@example.com',passwordHash:'hash-b',passwordSalt:'salt-b'});
 replaceTransactions(a.id,normalizeTransactions(rows));
 assert.equal(listTransactions(a.id).length,3); assert.equal(listTransactions(b.id).length,0); replaceTransactions(b.id,normalizeTransactions(rows)); assert.equal(listTransactions(b.id).length,3);
 const beforeAtomic = listTransactions(a.id); assert.throws(() => replaceTransactions(a.id,[beforeAtomic[0], beforeAtomic[0]])); assert.deepEqual(listTransactions(a.id), beforeAtomic);
 saveProfile(a.id,{monthlyBudget:500000,emergencyFundTarget:1000000,currentNetWorth:2500000,monthlyDebtPayment:50000,dependents:2,incomeStability:'stable',primaryGoal:'emergency'}); assert.equal(getProfile(a.id).monthlyBudget,500000); assert.equal(getProfile(b.id).monthlyBudget,600000);
-createGoal(a.id,{name:'Emergency fund',target:1000000,current:250000}); assert.equal(listGoals(a.id).length,1); assert.equal(listGoals(b.id).length,0);
+createGoal(a.id,{name:'Emergency fund',target:1000000,current:250000}); assert.equal(listGoals(a.id).length,1); assert.equal(listGoals(b.id).length,0);const ownedGoal=listGoals(a.id)[0];assert.equal(updateGoal(b.id,ownedGoal.id,999),undefined);assert.equal(updateGoal(a.id,ownedGoal.id,400000)?.current,400000);
 const plan=generatePlans(m)[0]; savePlan(a.id,plan); assert.equal((listPlans(a.id) as any[])[0].status,'accepted'); assert.equal(listPlans(b.id).length,0);
-const authUser=registerUser('auth@example.com','correct-horse-battery-staple'); assert.equal(verifyUser(authUser.email,'correct-horse-battery-staple').id,authUser.id); assert.throws(()=>verifyUser(authUser.email,'wrong-password'));
+const authUser=await registerUser('auth@example.com','correct-horse-battery-staple'); assert.equal((await verifyUser(authUser.email,'correct-horse-battery-staple')).id,authUser.id); await assert.rejects(()=>verifyUser(authUser.email,'wrong-password'));
 assert.ok(existsSync(dbPath)); rmSync(dbPath,{force:true});
 console.log('Pennywise domain + persistence + user-isolation verification: PASS');
