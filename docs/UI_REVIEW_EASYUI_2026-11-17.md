@@ -56,7 +56,7 @@ The current Pennywise app uses a deliberately small custom CSS system and does n
 
 ## Verification still required
 
-- Run GitHub Actions domain tests, SQLite persistence/isolation verification, TypeScript typecheck and Next.js production build against the final UI commit.
-- Review the rendered Preview at desktop and mobile widths; specifically check table density, category chart sizing, long descriptions, empty/loading/error states and keyboard focus.
-- Run browser E2E for signup/login, statement replacement, profile save, plan acceptance, savings-goal progress, balance masking and user isolation.
-- Do not describe the UI as fully accepted or the release as production-ready until the rendered review and remaining backend/security/operations gates are evidenced.
+- GitHub Actions run #14 passed on the final UI commit: domain tests 3/3, SQLite persistence/isolation verification, TypeScript typecheck and Next.js production build.
+- Still review the rendered Preview at desktop and mobile widths; specifically check table density, category chart sizing, long descriptions, empty/loading/error states and keyboard focus.
+- Still run browser E2E for signup/login, statement replacement, profile save, plan acceptance, savings-goal progress, balance masking and user isolation.
+- Do not describe the UI as fully accepted or the release as production-ready until rendered review and remaining backend/security/operations gates are evidenced.
