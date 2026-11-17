@@ -34,7 +34,7 @@ export function TransactionsTable({rows,formatMoney,hideAmounts=false}:Props){
  const visible=filtered.slice((safePage-1)*pageSize,safePage*pageSize);
  function sortBy(key:SortKey){if(sortKey===key)setDescending(v=>!v);else{setSortKey(key);setDescending(key==='date'||key==='amount');}setPage(1);}
  function header(key:SortKey,label:string){return <button type="button" className="table-sort" aria-label={`Sort by ${label}`} onClick={()=>sortBy(key)}>{label}<span aria-hidden="true">{sortKey===key?(descending?'↓':'↑'):'↕'}</span></button>}
- return <section className="panel transactions-full" aria-labelledby="all-transactions-title">
+ return <section id="all-transactions" className="panel transactions-full" aria-labelledby="all-transactions-title">
   <div className="panel-head table-heading"><div><span className="eyebrow">YOUR FULL MONEY HISTORY</span><h3 id="all-transactions-title">All transactions <span className="pill">{rows.length}</span></h3><p>Search, filter and sort the activity you imported.</p></div></div>
   <div className="table-toolbar">
    <label className="table-search"><span aria-hidden="true">⌕</span><input value={query} onChange={e=>{setQuery(e.target.value);setPage(1)}} placeholder="Search transactions" aria-label="Search transactions"/>{query&&<button type="button" onClick={()=>{setQuery('');setPage(1)}} aria-label="Clear search">×</button>}</label>
