@@ -37,7 +37,8 @@
 ## Verification record
 - Node.js 22 CI workflow added.
 - Previous CI run: domain tests 3/3, persistence/isolation verification, TypeScript typecheck and Next.js production build passed before the latest visual UI refinements.
-- Final UI revision CI and rendered Preview review: pending.
+- Final UI revision GitHub Actions run #14: dependency install, 3/3 domain tests, local SQLite persistence/isolation verification, TypeScript typecheck and Next.js production build all passed.
+- Rendered Preview, browser E2E and real-device visual review: pending.
 - Neon RLS behaviour passed on a disposable migration branch using a scoped non-owner role; permanent branch remains unchanged.
 - Production Postgres and Vercel runtime: not verified.
 
