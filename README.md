@@ -26,9 +26,12 @@ Pennywise helps a user understand imported financial activity, calculate a deter
 - Never expose DATABASE_URL through a NEXT_PUBLIC_* variable.
 
 ## Local setup
-Requires Node.js 22. Run npm install, copy .env.example to .env.local, then run npm test, npm run verify, npm run typecheck, npm run build and npm run dev.
+Requires Node.js 22. Run npm ci, copy .env.example to .env.local, then run npm test, npm run verify, npm run typecheck, npm run build and npm run dev.
 
 For local development, leave DATABASE_URL unset and set PENNYWISE_DB_PATH to a writable local path if needed.
+
+## Automated verification
+Run `npm ci`, `npm audit --audit-level=high`, `npm test`, `npm run verify`, `npm run typecheck` and `npm run build`. The CI workflow also provisions a disposable PostgreSQL service and runs `npm run test:postgres` with a least-privilege test role. That test database is ephemeral and is not the permanent Neon environment.
 
 ## Hosted setup
 1. Provision PostgreSQL and apply db/schema.sql.
