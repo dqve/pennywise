@@ -1,93 +1,48 @@
-# Pennywise — Initial MVP
+# Pennywise — personal finance MVP
 
-Pennywise is an AI-powered personal financial-management product. This repository contains the first executable MVP vertical slice: ingest financial activity, derive a deterministic financial picture, generate actionable plans, and persist the user's core financial state.
+Pennywise helps a user understand imported financial activity, calculate a deterministic financial snapshot, and compare suggested savings plans.
 
-## Product loop implemented
+## Current capabilities
+- Responsive single-page dashboard in Pennywise's warm off-white and forest-green visual language
+- Email/password signup and login using salted scrypt password hashes
+- HttpOnly session cookie; only a SHA-256 session-token hash is persisted
+- CSV/TXT import, validation and deterministic category inference
+- Text-based PDF statement extraction (no OCR or bank-specific layouts)
+- Income, expenses, estimated savings, spending-score and daily-budget calculations
+- Three deterministic plan options; server recomputes selected plan values before acceptance
+- Persistent user profile, plans, transactions and savings goals
+- Goal-progress updates with user-scoped ownership checks
+- Complete transaction history with search, category filtering, sorting and pagination
+- Spending-category breakdown, balance masking and subtle reduced-motion-aware amount feedback
 
-`UNDERSTAND → SCORE → PLAN → CHOOSE → TRACK`
+## Architecture and persistence
+- Next.js App Router and Node.js route handlers.
+- Local development and automated persistence tests use Node 22 SQLite in lib/db.ts.
+- Hosted Vercel deployments require a private server-side PostgreSQL DATABASE_URL; runtime fails closed when it is missing.
+- Apply db/schema.sql using a privileged migration role; use a separate least-privilege application role at runtime.
+- Financial tables have PostgreSQL RLS enabled and forced. Each authenticated data operation sets app.user_id transaction-locally after resolving the opaque session token. Every query also includes its user_id predicate.
+- The runtime database role must not own the tables and must not have BYPASSRLS. Never expose DATABASE_URL or SQL access to browser clients.
+- Authentication tables (users and sessions) are server-only and are not governed by the financial-table RLS policies.
+- Never expose DATABASE_URL through a NEXT_PUBLIC_* variable.
 
-### Implemented
-- Responsive financial-health dashboard
-- CSV/TXT statement import
-- Text-based PDF statement import via the existing transaction contract
-- Quoted-CSV parsing and validation
-- Deterministic merchant/category inference
-- Deterministic income, expense, savings and savings-rate calculations
-- Spending score and daily-budget calculation
-- Three financial-plan options
-- Persisted plan acceptance
-- Persisted financial profile
-- Persisted savings goals
-- Atomic transaction replacement
-- Server-side Node API boundary
-- Local SQLite persistence for executable development
-- Postgres/Supabase migration schema
-- Domain + persistence verification script
+## Local setup
+Requires Node.js 22. Run npm ci, copy .env.example to .env.local, then run npm test, npm run verify, npm run typecheck, npm run build and npm run dev.
 
-## Architecture
+For local development, leave DATABASE_URL unset and set PENNYWISE_DB_PATH to a writable local path if needed.
 
-`statement → parser → validated transactions → financial engine → projections/plans/goals → persistence → UI`
+## Automated verification
+Run `npm ci`, `npm audit --audit-level=high`, `npm test`, `npm run verify`, `npm run typecheck` and `npm run build`. The CI workflow also provisions a disposable PostgreSQL service and runs `npm run test:postgres` with a least-privilege test role. That test database is ephemeral and is not the permanent Neon environment.
 
-The financial engine is deterministic. AI is deliberately outside the financial-truth boundary: an eventual LLaMA/RAG service may explain verified metrics and recommend actions, but it must not become authoritative for balances, arithmetic, scoring inputs or projections.
+## Hosted setup
+1. Provision PostgreSQL and apply db/schema.sql.
+2. Create a restricted application database role. It must not own the tables and must not have BYPASSRLS. Grant only required DML access to the app schema/tables and set its connection string as server-only DATABASE_URL in Vercel Preview and Production.
+3. Deploy using Node.js 22.x.
+4. Verify signup, logout, login, refresh, import, profile, plan acceptance, savings-goal progress and user isolation against the hosted database before enabling real users.
 
-## Local persistence boundary
+See docs/DEPLOYMENT.md, docs/ARCHITECTURE.md, docs/SECURITY_REVIEW.md, docs/TRACEABILITY.md and docs/UI_REVIEW_EASYUI_2026-11-17.md.
 
-The development API uses Node 22's built-in SQLite implementation. Customer-facing routes now require email/password authentication and a server-side opaque session cookie. SQLite remains a development persistence choice; it is not the production database.
+## Financial-product limitations
+Pennywise is an MVP financial-organisation aid, not a bank-balance source, regulated financial adviser or bank-grade predictive model. Calculations are based only on transactions and profile details supplied by the user. The PDF parser supports a limited text-row format; scanned statements and institution-specific layouts are not supported.
 
-## Production migration target
-
-`db/schema.sql` defines the intended Postgres/Supabase model for:
-- transactions
-- financial profiles
-- savings goals
-- financial plans
-
-The production implementation must add authentication, RLS, auditability, encryption/key-management controls, rate limits and operational observability before customer financial data is accepted.
-
-## Remaining release slices
-
-1. Production Postgres/Supabase repository implementation + live RLS verification
-2. OCR and bank-specific PDF statement adapters behind the existing parser contract
-3. Transaction review/re-categorisation UX
-4. LLaMA/RAG recommendation service behind a feature flag
-5. Bank/open-banking provider adapter
-6. Notifications, recurring savings and streak/progress tracking
-7. Full browser E2E/accessibility/security/recovery suite
-
-## Verification
-
-The environment available for this build could not complete `npm install` within the execution limit, so a full Next.js production build could not honestly be claimed. The executable Node domain/persistence/validation/isolation verification does pass:
-
-```bash
-node --experimental-strip-types scripts/verify.ts
-```
-
-Expected result:
-
-`Pennywise domain + persistence + user-isolation verification: PASS`
-
-Once dependencies are installed in a normal development environment, run:
-
-```bash
-npm install
-npm test
-npm run typecheck
-npm run build
-npm run dev
-```
-
-## CSV contract
-
-```csv
-date,description,amount,category
-2026-10-01,Salary - Acme,850000,Income
-2026-10-02,"Shoprite, Ikeja",-24600,Food
-2026-10-03,Bolt,-8400,Transport
-```
-
-Category is optional. Positive amounts are treated as income; negative amounts are treated as expenses. Dates must use `YYYY-MM-DD`.
-
-
-## Engineering governance
-
-The current implementation is governed by `docs/REQUIREMENTS.md`, `docs/TRACEABILITY.md`, `docs/QA_CASES.md` and `docs/ARCHITECTURE.md`. The release gate is deliberately stricter than “the page renders”: authentication, isolation, financial correctness, failure recovery, build, browser QA and production database security must all be evidenced before production release.
+## Release state
+NOT PRODUCTION READY. Hosted database integration, browser E2E, accessibility, abuse prevention, independent security review, backups/recovery, observability and production deployment checks remain open release gates. Do not use real customer financial data until those gates have passed.

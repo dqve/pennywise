@@ -1,28 +1,37 @@
-# Pennywise MVP traceability
+# Pennywise requirement traceability — 20 November 2026
 
-| Requirement | Acceptance evidence | Implementation | Status |
+| Requirement | Acceptance evidence | Implementation | Current status |
 |---|---|---|---|
-| PNY-001 Import transactions | CSV/TXT parser, malformed input rejection, atomic replacement | `lib/parser.ts`, `lib/validation.ts`, `app/api/transactions/route.ts` | PASS locally |
-| PNY-002 Categorise transactions | Known merchants map deterministically; unknowns become Other | `lib/domain.ts` | PASS locally |
-| PNY-003 Calculate financial health | Income, expenses, savings, rate, score and daily budget derive from transactions | `lib/domain.ts` | PASS locally |
-| PNY-004 Generate plans | Three distinct deterministic plans generated from verified metrics | `lib/domain.ts` | PASS locally |
-| PNY-005 Accept a plan | Accepted plan persists and prior accepted plan is archived per user | `lib/db.ts`, `app/api/plans/route.ts` | PASS locally |
-| PNY-006 Financial guardrails | Budget and emergency-fund target persist | `lib/db.ts`, `app/api/profile/route.ts` | PASS locally |
-| PNY-007 Savings goals | Goal validation and user-scoped persistence | `lib/validation.ts`, `lib/db.ts`, `app/api/goals/route.ts` | PASS locally |
-| PNY-008 User isolation | User A cannot read user B transactions/profile/goals/plans | `lib/auth.ts`, `lib/db.ts`, API routes | PASS locally |
-| PNY-009 Credential/session security | Salted scrypt password hash; opaque HttpOnly cookie; hashed server session token | `lib/credentials.ts`, `lib/auth.ts` | Code review + credential test |
-| PNY-010 Invalid input rejection | Invalid dates, amounts, categories, profiles and goals rejected | `lib/validation.ts` | PASS locally |
-| PNY-011 Atomic replacement | Failed duplicate insert leaves previous statement intact | `lib/db.ts`, `scripts/verify.ts` | PASS locally |
-| PNY-017 Financial assessment | Net worth, debt payment, dependents, stability and primary goal persist | `lib/validation.ts`, `lib/db.ts`, `app/api/profile/route.ts`, `app/page.tsx` | PASS locally |
-| PNY-018 12-month projection | Projection uses starting net worth and selected plan; no LLM arithmetic | `app/page.tsx` | Source verified; browser gate blocked |
+| PNY-001 Import transactions | Valid CSV/TXT rows accepted; malformed input rejected; replacement is atomic | lib/parser.ts, lib/validation.ts, transaction API | Implemented; SQLite and PostgreSQL rollback checks pass in CI |
+| PNY-002 Categorise transactions | Known merchants map deterministically; unknown categories remain safe | lib/domain.ts | Unit tests passed |
+| PNY-003 Calculate financial picture | Income, expenses, estimated savings, spending score and daily budget derive from normalized inputs | lib/domain.ts | Unit tests passed |
+| PNY-004 Generate plans | Three deterministic options generated from server-side metrics | lib/domain.ts, plans API | Source implemented; local checks passed |
+| PNY-005 Accept plan | Server recomputes plan; one active plan per user enforced with DB partial unique index | plans API, Postgres schema, persistence adapter | Disposable PostgreSQL CI concurrency test passed; permanent Neon still pending |
+| PNY-006 Financial profile | Budget, emergency target, net worth, debt payment, dependents and preferences persist | Profile API, persistence adapter | SQLite and disposable PostgreSQL CI smoke tests passed; permanent Neon/Preview unverified |
+| PNY-007 Savings goals | Create/list/update progress; mutation is owner-scoped | Goals API, persistence adapter | SQLite and disposable PostgreSQL CI smoke tests passed; permanent Neon/Preview unverified |
+| PNY-008 User isolation | Unauthenticated requests rejected; user A cannot access user B financial records | Auth boundary, owner predicates and Postgres RLS | SQLite and disposable PostgreSQL RLS tests passed; permanent Neon/Preview unverified |
+| PNY-009 Credential/session security | Salted scrypt hash; opaque HttpOnly cookie; hashed server token | credentials.ts, auth.ts | Implemented in source; rate limiting, account recovery and operational cleanup open |
+| PNY-010 Input validation | Invalid transaction, profile, goal and credential input rejected | validation.ts, credential validator | Domain tests cover impossible dates and database-safe numeric ranges; API/browser negative cases still required |
+| PNY-011 Atomic statement replacement | Failed replacement leaves prior statement intact | SQLite repository; Postgres transaction | SQLite and disposable PostgreSQL rollback checks passed |
+| PNY-013 Postgres RLS | Financial tables have enabled/forced RLS, user policies and runtime role is not owner/BYPASSRLS | db/schema.sql, lib/db-runtime.ts, CI PG suite | Disposable PostgreSQL 16 CI test passed; permanent Neon role/schema setup still pending |
+| PNY-016 Text PDF import | Supported text rows normalize into transaction contract; oversized/invalid PDF rejected | lib/pdf.ts, PDF route | Source and local fixture exist; representative bank layouts and hostile-file tests pending |
+| PNY-017 Financial assessment | Net worth, budget, emergency target, debt, dependents and preferences persist | Profile API, persistence adapter | SQLite and disposable PostgreSQL CI smoke tests passed; browser journey pending |
+| PNY-018 Projection | One-year projection uses profile and selected deterministic plan, not LLM arithmetic | Existing product implementation | Source present; browser validation pending |
 
-## Explicitly blocked gates
+## Latest automated verification — GitHub Actions run #41
+- Committed lockfile and clean `npm ci`: passed.
+- High-severity dependency audit: passed with Next.js 16.4.6 and Zod 4.6.7.
+- PostgreSQL 16 integration suite using isolated non-owner/no-BYPASSRLS role: passed. Includes no-context RLS, tenant-scoped reads, cross-user write denial, connection identity reset, rollback and concurrent accepted-plan uniqueness.
+- Domain/input-security tests, local SQLite persistence/isolation checks, TypeScript typecheck and Next.js production build: passed.
 
-- Full dependency-backed Next.js typecheck
-- Next.js production build
-- Browser E2E and accessibility smoke tests
-- Production Postgres/Supabase/RLS verification
-- PDF ingestion
+## Required release evidence still missing
+- Permanent Neon migration and production runtime role/grants verified against the intended persistent branch.
+- Vercel project access, Preview deployment and hosted DATABASE_URL validation.
+- Complete browser E2E journey across two accounts, including permissions and recovery/failure states.
+- Rate limiting, credential-stuffing, account recovery and adversarial CSRF/cross-origin tests.
+- Responsive/accessibility review on real browser/device viewports.
+- Representative PDF compatibility and malicious-file/resource exhaustion tests.
+- Audit events, observability, backup/restore and incident-response evidence.
+- Independent security and release review.
 
-The dependency-backed gates are blocked by the execution environment's inability to resolve the npm registry. They are not represented as passing merely because the source compiles at a syntax level.
-| PNY-016 | Text-based PDF extraction normalizes rows to the same transaction contract | `lib/pdf.ts`, `app/api/transactions/pdf/route.ts` | Local generated-PDF verification PASS; production binary portability blocked |
+Automated PostgreSQL evidence here refers to a throwaway CI database with synthetic data. It does not certify the permanent Neon environment or a deployed runtime. The release remains NOT PRODUCTION READY.
