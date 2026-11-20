@@ -8,6 +8,20 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: pennywise_ci_password
+          POSTGRES_DB: pennywise_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d pennywise_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -19,6 +33,11 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Dependency vulnerability audit
         run: npm audit --audit-level=high
+      - name: PostgreSQL RLS integration tests
+        run: npm run test:postgres
+        env:
+          DATABASE_URL: postgres://pennywise_test_runtime:pennywise_test_password@localhost:5432/pennywise_ci
+          PENNYWISE_TEST_ADMIN_DATABASE_URL: postgres://postgres:pennywise_ci_password@localhost:5432/pennywise_ci
       - name: Unit tests
         run: npm test
       - name: Local persistence and isolation checks
