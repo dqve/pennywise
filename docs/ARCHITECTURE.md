@@ -32,3 +32,9 @@ Statement replacement is transactional and does not report success until persist
 
 ## Constraints
 PDF parsing supports text-based transaction rows in a limited date/description/amount layout. OCR and bank-specific adapters are not implemented. The financial model is an MVP estimate, not a bank ledger or regulated financial advice.
+
+## Request-origin and mutation security
+All state-changing API handlers pass through the shared same-origin mutation guard. When an Origin header is present, its parsed origin must exactly equal the request URL origin; malformed and opaque origins are rejected. If Origin is absent, Sec-Fetch-Site must be exactly same-origin. Same-site is not treated as same-origin. This is a CSRF defence-in-depth control, not a replacement for a dedicated adversarial browser review.
+
+## Automated persistence verification
+CI provisions an ephemeral PostgreSQL 16 service and a dedicated non-owner/no-BYPASSRLS runtime role. Integration tests exercise the same PostgreSQL repository adapter and schema used by hosted runtime, covering RLS, transaction-local tenant context, cross-user write rejection, rollback and accepted-plan uniqueness. The service is destroyed after each run and is not the persistent Neon environment.
