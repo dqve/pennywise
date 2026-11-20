@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
+import { isSameOriginMutation } from '../../../../lib/request-security.ts';
 import { publicUser, startSession, validateCredentials, verifyUser } from '../../../../lib/auth.ts';
 export const runtime='nodejs';
 export async function POST(req:Request){
+  if (!isSameOriginMutation(req)) return NextResponse.json({error:'Cross-origin request rejected'},{status:403});
   let credentials;
   try { const body=await req.json(); credentials=validateCredentials(body?.email,body?.password); }
   catch(e){ return NextResponse.json({error:e instanceof Error?e.message:'Invalid credentials'},{status:400}); }
