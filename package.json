@@ -12,10 +12,10 @@
     "test:postgres": "node --experimental-strip-types scripts/prepare-postgres-test.ts && node --experimental-strip-types --test tests/postgres-integration.test.ts"
   },
   "dependencies": {
-    "next": "16.3.8",
+    "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "zod": "4.6.5",
+    "zod": "4.6.7",
     "postgres": "3.4.9",
     "pdf-parse": "2.4.5"
   },
