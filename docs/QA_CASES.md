@@ -39,3 +39,15 @@
 | QA-035 | Goal progress above target | API rejects values above the goal target and existing progress remains unchanged |
 
 RLS checks passed on a disposable Neon migration branch using a scoped read/write role; the permanent Neon branch has not yet received the migration. The latest UI CI run and browser E2E are pending.
+
+| QA-036 | Cross-origin or opaque-origin state-changing API request | 403; the requested mutation does not occur |
+| QA-037 | Invalid calendar date, oversized transaction ID or amount outside the supported numeric range | 400; existing financial data remains unchanged |
+| QA-038 | Goal target exceeds the supported database numeric range | 400; goal is not persisted |
+
+## Latest automated verification — GitHub Actions run #41
+- `npm ci` from the committed lockfile and `npm audit --audit-level=high`: passed.
+- PostgreSQL integration suite on a disposable PostgreSQL 16 service: passed. Covers non-owner/no-BYPASSRLS role flags, table ownership, ENABLE + FORCE RLS, no-context reads, tenant-scoped reads, cross-user UPDATE/DELETE denial, cross-user INSERT rejection, transaction-local identity reset, atomic replacement rollback and one accepted plan under concurrent attempts.
+- Domain/input-security unit tests, local SQLite persistence/isolation, TypeScript typecheck and production build: passed.
+- This CI database is ephemeral and contains synthetic test data. Permanent Neon migration and Vercel runtime verification remain separate release gates.
+
+The suite does not replace manual browser E2E, real-device accessibility/responsive review, adversarial CSRF and abuse testing, representative PDF testing or production recovery drills.
