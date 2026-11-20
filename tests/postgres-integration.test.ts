@@ -4,7 +4,7 @@ import { randomBytes } from 'node:crypto';
 import postgres from 'postgres';
 import {
   createUser, createGoal, getProfile, listGoals, listPlans, listTransactions,
-  replaceTransactions, savePlan, saveProfile
+  replaceTransactions, savePlan, saveProfile, updateGoal
 } from '../lib/db-runtime.ts';
 
 const databaseUrl = process.env.DATABASE_URL;
@@ -37,12 +37,13 @@ test('PostgreSQL runtime enforces tenant RLS, rollback and accepted-plan uniquen
     assert.equal(role.rolcreatedb, false);
 
     const policies = await runtime`
-      SELECT relname, relrowsecurity, relforcerowsecurity
+      SELECT relname, relrowsecurity, relforcerowsecurity, pg_get_userbyid(relowner) AS owner
       FROM pg_class
       WHERE relname IN ('transactions','financial_profiles','savings_goals','financial_plans')
     `;
     assert.equal(policies.length, 4);
     assert.ok(policies.every(row => row.relrowsecurity && row.relforcerowsecurity));
+    assert.ok(policies.every(row => row.owner !== 'pennywise_test_runtime'));
 
     const noContext = await runtime.begin(async tx => ({
       transactions: Number((await tx`SELECT count(*) AS count FROM transactions`)[0].count),
@@ -71,6 +72,11 @@ test('PostgreSQL runtime enforces tenant RLS, rollback and accepted-plan uniquen
       return tx`UPDATE transactions SET amount = 999 WHERE user_id = ${userB.id} RETURNING id`;
     });
     assert.equal(crossUserUpdate.length, 0);
+    const crossUserDelete = await runtime.begin(async tx => {
+      await tx`SELECT set_config('app.user_id', ${userA.id}, true)`;
+      return tx`DELETE FROM transactions WHERE user_id = ${userB.id} RETURNING id`;
+    });
+    assert.equal(crossUserDelete.length, 0);
 
     await assert.rejects(
       runtime.begin(async tx => {
@@ -96,10 +102,11 @@ test('PostgreSQL runtime enforces tenant RLS, rollback and accepted-plan uniquen
     assert.ok(goal);
     assert.equal((await getProfile(userA.id)).monthlyBudget, 1000);
 
-    await Promise.allSettled([
+    const concurrentAttempts = await Promise.allSettled([
       savePlan(userA.id, plan('Concurrent plan A')),
       savePlan(userA.id, plan('Concurrent plan B'))
     ]);
+    assert.ok(concurrentAttempts.some(result => result.status === 'fulfilled'));
     const accepted = (await listPlans(userA.id)).filter(item => item.status === 'accepted');
     assert.equal(accepted.length, 1);
   } finally {
