@@ -55,3 +55,15 @@ A schema migration was prepared and tested on disposable Neon branch br-long-hea
 
 ## Release decision
 NOT PRODUCTION READY. Do not process real customer financial data until the open gates are closed and evidenced.
+
+## Engineering follow-up — 20 November 2026
+- Committed package-lock.json and changed CI to use `npm ci`.
+- Added a high-severity dependency audit. It identified patched advisories in the original Next.js and Zod pins; upgraded to Next.js 16.4.6 and Zod 4.6.7. The audit now passes.
+- Added same-origin mutation checks across auth and customer mutation endpoints, with unit coverage.
+- Added dummy scrypt work for unknown-account login attempts and stricter transaction date, identifier and numeric-range validation.
+- Added disposable PostgreSQL 16 integration coverage using a non-owner/no-BYPASSRLS role for RLS, tenant isolation, cross-user write denial, transaction-local identity reset, rollback and concurrent plan uniqueness.
+- Latest GitHub Actions run #41 passed `npm ci`, dependency audit, PostgreSQL integration tests, domain tests, local SQLite persistence/isolation checks, TypeScript typecheck and Next.js production build.
+- CI now uses a read-only contents permission and lockfile-based installs.
+
+## Remaining release decision
+The above are feature-branch implementation and isolated CI results. Permanent Neon migration/role setup, Vercel team/project access, Preview deployment, two-account browser E2E, rate limiting, adversarial CSRF review, accessibility, PDF abuse testing, observability and recovery remain open. Release remains NOT PRODUCTION READY.
