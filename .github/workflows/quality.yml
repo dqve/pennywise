@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
 permissions:
-  contents: read
+  contents: write
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -25,19 +25,29 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref }}
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '22'
       - name: Install dependencies
         run: npm install --no-audit --no-fund
-      - name: Upload generated npm lockfile
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: pennywise-npm-lockfile-upgraded
-          path: package-lock.json
-          if-no-files-found: error
-          retention-days: 1
+      - name: Commit generated dependency lockfile
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'feat/violet-postgres-auth-hardening' && github.event.pull_request.head.repo.full_name == github.repository && github.actor == 'dqve'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GIT_TERMINAL_PROMPT: '0'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          if git diff --cached --quiet; then
+            echo "package-lock.json is already up to date"
+            exit 0
+          fi
+          git commit -m "security: lock patched npm dependencies"
+          AUTH_HEADER="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)"
+          git -c http.extraheader="AUTHORIZATION: basic $AUTH_HEADER" push origin "HEAD:$GITHUB_HEAD_REF"
       - name: Dependency vulnerability audit
         run: npm audit --audit-level=high
       - name: PostgreSQL RLS integration tests
