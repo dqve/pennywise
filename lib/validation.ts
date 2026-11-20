@@ -1,5 +1,11 @@
 import { CATEGORIES, isCategory, type Transaction } from './domain.ts';
 
+function isCalendarDate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
 export function validateTransactions(value: unknown): Transaction[] {
   if (!Array.isArray(value)) throw new Error('transactions must be an array');
   const seen = new Set<string>();
@@ -11,10 +17,10 @@ export function validateTransactions(value: unknown): Transaction[] {
     const description = String(row.description ?? '').trim();
     const amount = typeof row.amount === 'number' ? row.amount : Number(row.amount);
     const category = row.category == null ? undefined : String(row.category);
-    if (!id || seen.has(id)) throw new Error(`Duplicate or missing transaction id at index ${index}`);
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) throw new Error(`Invalid transaction date at index ${index}`);
+    if (!id || id.length > 120 || seen.has(id)) throw new Error(`Duplicate, missing or oversized transaction id at index ${index}`);
+    if (!isCalendarDate(date)) throw new Error(`Invalid transaction date at index ${index}`);
     if (!description || description.length > 240) throw new Error(`Invalid transaction description at index ${index}`);
-    if (!Number.isFinite(amount)) throw new Error(`Invalid transaction amount at index ${index}`);
+    if (!Number.isFinite(amount) || Math.abs(amount) > 1_000_000_000_000_000) throw new Error(`Invalid transaction amount at index ${index}`);
     if (category && !isCategory(category)) throw new Error(`Invalid category at index ${index}; expected one of ${CATEGORIES.join(', ')}`);
     seen.add(id);
     return { id, date, description, amount, category: category as Transaction['category'] };
@@ -46,7 +52,7 @@ export function validateGoal(value: unknown) {
   const target = Number(row.target);
   const current = Number(row.current ?? 0);
   if (!name || name.length > 100) throw new Error('Goal name is required');
-  if (!Number.isFinite(target) || target <= 0) throw new Error('Goal target must be greater than zero');
+  if (!Number.isFinite(target) || target <= 0 || target > 1_000_000_000_000_000) throw new Error('Goal target must be greater than zero and within the supported range');
   if (!Number.isFinite(current) || current < 0 || current > target) throw new Error('Goal current amount is invalid');
   return { name, target, current };
 }
