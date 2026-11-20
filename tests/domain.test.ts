@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { calculateMetrics, generatePlans, inferCategory, normalizeTransactions } from '../lib/domain.ts';
+import { validateGoal, validateTransactions } from '../lib/validation.ts';
+import { isSameOriginMutation } from '../lib/request-security.ts';
+
 
 test('known merchants categorise deterministically', () => {
   assert.equal(inferCategory('Bolt ride', -8000), 'Transport');
@@ -24,8 +27,6 @@ test('financial engine produces three actionable plans', () => {
   assert.ok(plans.every(p => p.monthlySavings > 0));
 });
 
-import { validateGoal, validateTransactions } from '../lib/validation.ts';
-import { isSameOriginMutation } from '../lib/request-security.ts';
 
 test('mutation request guard accepts same-origin browser requests only', () => {
   assert.equal(isSameOriginMutation(new Request('https://pennywise.test/api/profile', {
