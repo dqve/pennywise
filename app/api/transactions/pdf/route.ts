@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
+import { isSameOriginMutation } from '../../../../lib/request-security.ts';
 import { requireCurrentUser } from '../../../../lib/auth.ts';
 import { replaceTransactions } from '../../../../lib/db-runtime.ts';
 import { extractPdfTransactions } from '../../../../lib/pdf.ts';
 export const runtime='nodejs';
 export async function POST(req:Request){
+  if (!isSameOriginMutation(req)) return NextResponse.json({error:'Cross-origin request rejected'},{status:403});
   let user;try{user=await requireCurrentUser();}catch(e){const unauth=e instanceof Error&&e.message==='UNAUTHENTICATED';return NextResponse.json({error:unauth?'Unauthenticated':'Service temporarily unavailable'},{status:unauth?401:503});}
   let rows;try{
     const form=await req.formData();const file=form.get('file');
