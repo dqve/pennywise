@@ -45,12 +45,12 @@ test('PostgreSQL runtime enforces tenant RLS, rollback and accepted-plan uniquen
     assert.ok(policies.every(row => row.relrowsecurity && row.relforcerowsecurity));
 
     const noContext = await runtime.begin(async tx => ({
-      transactions: await tx`SELECT user_id FROM transactions`,
-      profiles: await tx`SELECT user_id FROM financial_profiles`,
-      goals: await tx`SELECT user_id FROM savings_goals`,
-      plans: await tx`SELECT user_id FROM financial_plans`
+      transactions: Number((await tx`SELECT count(*) AS count FROM transactions`)[0].count),
+      profiles: Number((await tx`SELECT count(*) AS count FROM financial_profiles`)[0].count),
+      goals: Number((await tx`SELECT count(*) AS count FROM savings_goals`)[0].count),
+      plans: Number((await tx`SELECT count(*) AS count FROM financial_plans`)[0].count)
     }));
-    assert.deepEqual(noContext, { transactions: [], profiles: [], goals: [], plans: [] });
+    assert.deepEqual(noContext, { transactions: 0, profiles: 0, goals: 0, plans: 0 });
 
     const scoped = await runtime.begin(async tx => {
       await tx`SELECT set_config('app.user_id', ${userA.id}, true)`;
@@ -70,7 +70,7 @@ test('PostgreSQL runtime enforces tenant RLS, rollback and accepted-plan uniquen
       await tx`SELECT set_config('app.user_id', ${userA.id}, true)`;
       return tx`UPDATE transactions SET amount = 999 WHERE user_id = ${userB.id} RETURNING id`;
     });
-    assert.deepEqual(crossUserUpdate, []);
+    assert.equal(crossUserUpdate.length, 0);
 
     await assert.rejects(
       runtime.begin(async tx => {
@@ -83,7 +83,7 @@ test('PostgreSQL runtime enforces tenant RLS, rollback and accepted-plan uniquen
 
     // Reusing the same one-connection pool must not inherit a prior transaction's identity.
     const afterIdentityReset = await runtime.begin(async tx => tx`SELECT user_id FROM transactions`);
-    assert.deepEqual(afterIdentityReset, []);
+    assert.equal(afterIdentityReset.length, 0);
 
     const beforeRollback = await listTransactions(userA.id);
     await assert.rejects(replaceTransactions(userA.id, [
